@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"encoding/csv"
+	"errors"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io"
@@ -99,7 +101,7 @@ func ParseTable(doc *goquery.Document, tableid string) Table {
 			})
 
 			// loop through rows
-			tsel.Find("tr").Each(func(index int, rsel *goquery.Selection) {
+			tsel.Find("tbody").Find("tr").Each(func(index int, rsel *goquery.Selection) {
 				var row []string
 
 				// loop through cells
@@ -112,10 +114,12 @@ func ParseTable(doc *goquery.Document, tableid string) Table {
 			})
 		}
 	})
+
+	fmt.Println(table.rows)
 	return table
 }
 
-func ParsePage(filePath string) {
+func ParsePage(filePath string) []Table {
 	// read file into memory
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -128,27 +132,30 @@ func ParsePage(filePath string) {
 		log.Fatal(err)
 	}
 
+	var tables []Table
 	for _, tableid := range internal.PFR_TABLE_IDS {
 		table := ParseTable(doc, tableid)
-
-		fmt.Println(table.name)
-		for _, hdr := range table.headers {
-			fmt.Print(hdr)
-			fmt.Print(",")
-		}
-		for _, row := range table.rows {
-			for _, cell := range row {
-				fmt.Print(cell)
-				fmt.Print(",")
-			}
-			fmt.Println()
-		}
-		fmt.Println()
+		tables = append(tables, table)
 	}
+	return tables
 }
 
 func WriteFile(filePath string, contents string) {
 	if err := os.WriteFile(filePath, []byte(contents), 0644); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func WriteCSVFile(filePath string, table Table) {
+	file, err := os.Create(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lines := append([][]string{table.headers}, table.rows...)
+	writer := csv.NewWriter(file)
+	err = writer.WriteAll(lines)
+	if err != nil {
 		log.Fatal(err)
 	}
 }
@@ -165,6 +172,11 @@ func main() {
 	}
 	if _, err := os.Stat("output/fetched_pages"); os.IsNotExist(err) {
 		if err := os.Mkdir("output/fetched_pages", 0755); err != nil {
+			log.Fatal(err)
+		}
+	}
+	if _, err := os.Stat("output/parsed_tables"); os.IsNotExist(err) {
+		if err := os.Mkdir("output/parsed_tables", 0755); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -199,30 +211,29 @@ func main() {
 		teamCount = 0
 		for team, team_key := range teamsToFetch {
 			teamCount += 1
-			filePath := fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year)
 
-			// skip fetching if the data already exists
-			if !forceFetch {
-				if _, err := os.Stat(filePath); err == nil {
-					fmt.Printf("\tSkipping %s %d, already exists.\n", team, year)
-					continue
-				}
+			// fetch and despoof page
+			fetchFilePath := fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year)
+			_, err := os.Stat(fetchFilePath)
+			if errors.Is(err, os.ErrNotExist) || forceFetch == true {
+				pageString := FetchPage(team_key, year)
+				WriteFile(fetchFilePath, pageString)
+				DespoofPage(fetchFilePath)
+				fmt.Printf("    > Fetched %s %d ⬇️\n", team, year)
+			} else {
+				fmt.Printf("    > Skipped fetching %s %d, already exists.\n", team, year)
 			}
 
-			// fetch page
-			pageString := FetchPage(team_key, year)
-			WriteFile(filePath, pageString)
-
-			// despoof page
-			DespoofPage(filePath)
-
-			// parse data
-			ParsePage(filePath)
+			// parse page table data
+			tables := ParsePage(fetchFilePath)
+			for _, table := range tables {
+				csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, table.name)
+				WriteCSVFile(csvFilePath, table)
+			}
 
 			// perform calculations
 
 			// write output to file
-			fmt.Printf("\tFetched %s %d.\n", team, year)
 
 			// sleep to avoid rate limiting, unless we've already fetched the last team in the last year
 			if yearCount < len(yearsToFetch) || teamCount < len(teamsToFetch) {
