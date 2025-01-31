@@ -1,4 +1,4 @@
-package lib
+package internal
 
 // Pro Football Reference team keys
 var PFR_TEAM_KEYS = map[string]string{
@@ -34,4 +34,10 @@ var PFR_TEAM_KEYS = map[string]string{
 	"TB":  "tam",
 	"TEN": "oti",
 	"WSH": "was",
+}
+
+// Pro Football Reference table ids
+var PFR_TABLE_IDS = []string{
+	"passing",
+	"rushing_and_receiving",
 }

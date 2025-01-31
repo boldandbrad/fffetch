@@ -13,11 +13,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/boldandbrad/fffetch/lib"
+	"github.com/boldandbrad/fffetch/internal"
 )
 
 var TEAMS = []string{"DET"}
 var YEARS = []int{2024}
+
+type Table struct {
+	name    string
+	headers []string
+	rows    [][]string
+}
 
 func FetchPage(teamKey string, year int) string {
 	url := fmt.Sprintf("https://www.pro-football-reference.com/teams/%s/%d.htm", teamKey, year)
@@ -76,6 +82,39 @@ func DespoofPage(filePath string) {
 	WriteFile(filePath, strings.Join(lines, "\n"))
 }
 
+func ParseTable(doc *goquery.Document, tableid string) Table {
+	var table Table
+	table.name = tableid
+
+	doc.Find(fmt.Sprintf("#%s", tableid)).Each(func(i int, tsel *goquery.Selection) {
+		if i == 0 {
+			// loop through headers
+			tsel.Find("th").Each(func(_ int, hsel *goquery.Selection) {
+				if hsel != nil {
+					key, exists := hsel.Attr("data-stat")
+					if exists && key != "ranker" && !strings.Contains(key, "header") {
+						table.headers = append(table.headers, key)
+					}
+				}
+			})
+
+			// loop through rows
+			tsel.Find("tr").Each(func(index int, rsel *goquery.Selection) {
+				var row []string
+
+				// loop through cells
+				rsel.Find("td").Each(func(_ int, csel *goquery.Selection) {
+					if csel != nil {
+						row = append(row, csel.Text())
+					}
+				})
+				table.rows = append(table.rows, row)
+			})
+		}
+	})
+	return table
+}
+
 func ParsePage(filePath string) {
 	// read file into memory
 	file, err := os.Open(filePath)
@@ -89,41 +128,23 @@ func ParsePage(filePath string) {
 		log.Fatal(err)
 	}
 
-	// var headers []int
+	for _, tableid := range internal.PFR_TABLE_IDS {
+		table := ParseTable(doc, tableid)
 
-	doc.Find("#passing").Each(func(i int, sel *goquery.Selection) {
-		if i == 0 {
-
-			// loop through headers
-			hdrs := sel.Find("th").Each(func(_ int, sel *goquery.Selection) {
-				if sel != nil {
-					key, exists := sel.Attr("data-stat")
-					if exists {
-						fmt.Print(key)
-					} else {
-						fmt.Print(sel.Text())
-					}
-					fmt.Print(" ")
-				}
-			})
-
-			fmt.Println()
-
-			// loop through cells
-			sel.Find("td").Each(func(index int, sel *goquery.Selection) {
-				if sel != nil {
-					fmt.Print(sel.Text())
-					fmt.Print(" ")
-				}
-
-				// Printing columns nicely
-				if (index+1)%(hdrs.Size()-8) == 0 {
-					fmt.Println()
-				}
-			})
+		fmt.Println(table.name)
+		for _, hdr := range table.headers {
+			fmt.Print(hdr)
+			fmt.Print(",")
 		}
-	})
-
+		for _, row := range table.rows {
+			for _, cell := range row {
+				fmt.Print(cell)
+				fmt.Print(",")
+			}
+			fmt.Println()
+		}
+		fmt.Println()
+	}
 }
 
 func WriteFile(filePath string, contents string) {
@@ -153,11 +174,11 @@ func main() {
 	teamsToFetch := map[string]string{}
 	if len(TEAMS) == 0 {
 		// if no teams provided, fetch data for every team
-		teamsToFetch = lib.PFR_TEAM_KEYS
+		teamsToFetch = internal.PFR_TEAM_KEYS
 	} else {
 		// fetch data for provided teams only
 		for _, team := range TEAMS {
-			teamsToFetch[team] = lib.PFR_TEAM_KEYS[team]
+			teamsToFetch[team] = internal.PFR_TEAM_KEYS[team]
 		}
 	}
 
