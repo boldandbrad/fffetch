@@ -12,11 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"fffetch/lib"
+	"github.com/boldandbrad/fffetch/lib"
 )
 
 var TEAMS = []string{"DET"}
-var YEARS = []int{2022, 2023}
+var YEARS = []int{2022, 2023, 2024}
 
 func FetchPage(teamKey string, year int) string {
 	url := fmt.Sprintf("https://www.pro-football-reference.com/teams/%s/%d.htm", teamKey, year)
