@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"io"
 	"log"
 	"math/rand/v2"
@@ -16,7 +17,7 @@ import (
 )
 
 var TEAMS = []string{"DET"}
-var YEARS = []int{2022, 2023, 2024}
+var YEARS = []int{2024}
 
 func FetchPage(teamKey string, year int) string {
 	url := fmt.Sprintf("https://www.pro-football-reference.com/teams/%s/%d.htm", teamKey, year)
@@ -75,6 +76,56 @@ func DespoofPage(filePath string) {
 	WriteFile(filePath, strings.Join(lines, "\n"))
 }
 
+func ParsePage(filePath string) {
+	// read file into memory
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	doc, err := goquery.NewDocumentFromReader(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// var headers []int
+
+	doc.Find("#passing").Each(func(i int, sel *goquery.Selection) {
+		if i == 0 {
+
+			// loop through headers
+			hdrs := sel.Find("th").Each(func(_ int, sel *goquery.Selection) {
+				if sel != nil {
+					key, exists := sel.Attr("data-stat")
+					if exists {
+						fmt.Print(key)
+					} else {
+						fmt.Print(sel.Text())
+					}
+					fmt.Print(" ")
+				}
+			})
+
+			fmt.Println()
+
+			// loop through cells
+			sel.Find("td").Each(func(index int, sel *goquery.Selection) {
+				if sel != nil {
+					fmt.Print(sel.Text())
+					fmt.Print(" ")
+				}
+
+				// Printing columns nicely
+				if (index+1)%(hdrs.Size()-8) == 0 {
+					fmt.Println()
+				}
+			})
+		}
+	})
+
+}
+
 func WriteFile(filePath string, contents string) {
 	if err := os.WriteFile(filePath, []byte(contents), 0644); err != nil {
 		log.Fatal(err)
@@ -127,10 +178,11 @@ func main() {
 		teamCount = 0
 		for team, team_key := range teamsToFetch {
 			teamCount += 1
+			filePath := fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year)
 
 			// skip fetching if the data already exists
 			if !forceFetch {
-				if _, err := os.Stat(fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year)); err == nil {
+				if _, err := os.Stat(filePath); err == nil {
 					fmt.Printf("\tSkipping %s %d, already exists.\n", team, year)
 					continue
 				}
@@ -138,12 +190,13 @@ func main() {
 
 			// fetch page
 			pageString := FetchPage(team_key, year)
-			WriteFile(fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year), pageString)
+			WriteFile(filePath, pageString)
 
 			// despoof page
-			DespoofPage(fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year))
+			DespoofPage(filePath)
 
 			// parse data
+			ParsePage(filePath)
 
 			// perform calculations
 
