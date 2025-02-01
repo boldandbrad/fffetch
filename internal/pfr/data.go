@@ -1,4 +1,4 @@
-package internal
+package pfr
 
 // Pro Football Reference team keys
 var PFR_TEAM_KEYS = map[string]string{
