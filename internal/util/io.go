@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-var OUT_DIRS = []string{"output", "output/fetched_pages", "output/parsed_tables"}
+var OUT_DIRS = []string{"output", "output/fetched_pages", "output/parsed_tables", "output/final"}
 
 func CreateOutDirs() {
 	// create output directories if they don't exist

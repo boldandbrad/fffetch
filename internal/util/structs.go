@@ -1,21 +1,18 @@
 package util
 
 import (
+	"fmt"
 	"slices"
 )
 
 var OUT_HEADERS = []string{
+	"year",
+	"order",
 	"player",
 	"age",
 	"pos",
 	"g",
 	"gs",
-	"pass_cmp",
-	"pass_att",
-	"pass_yds",
-	"pass_td",
-	"pass_int",
-	"pass_sacked_yds",
 	"rush_att",
 	"rush_yds",
 	"rush_td",
@@ -29,6 +26,33 @@ var OUT_HEADERS = []string{
 	"rec_1d%",
 	"touches",
 	"fumbles",
+	"pass_cmp",
+	"pass_att",
+	"pass_yds",
+	"pass_td",
+	"pass_int",
+	"pass_sacked_yds",
+	"pass_cmp%",
+	"pass_att%",
+	"pass_yds%",
+	"pass_td%",
+	"pass_int%",
+	"pass_sacked_yds%",
+	"rush_att%",
+	"rush_yds%",
+	"rush_td%",
+	"targets%",
+	"rec%",
+	"rec_yds%",
+	"rec_td%",
+	"touches%",
+	"fumbles%",
+	"std_pts",
+	"half_ppr_pts",
+	"ppr_pts",
+	"std_ppg",
+	"half_ppr_ppg",
+	"ppr_ppg",
 }
 
 type Table struct {
@@ -79,7 +103,7 @@ func (m TableMap) ToTable() Table {
 			if exists {
 				row = append(row, value)
 			} else {
-				row = append(row, "")
+				row = append(row, "0")
 			}
 		}
 		table.Rows = append(table.Rows, row)
@@ -153,4 +177,16 @@ func (t Table) PruneColumns() Table {
 	tableMap.Headers = OUT_HEADERS
 	prunedTable := tableMap.ToTable()
 	return prunedTable
+}
+
+func (t Table) AddTeamAndYear(team string, year string) Table {
+	tableMap := t.ToMap()
+	tableMap.Headers = append(tableMap.Headers, "year")
+	for _, dict := range tableMap.Dicts {
+		dict["year"] = year
+	}
+	tableMap.FooterDict["year"] = year
+	tableMap.FooterDict["player"] = fmt.Sprintf("%s Totals", team)
+
+	return tableMap.ToTable()
 }

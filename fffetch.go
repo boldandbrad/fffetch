@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/boldandbrad/fffetch/internal/pfr"
@@ -80,14 +81,17 @@ func main() {
 			csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, mergedTable.Name)
 			util.WriteCSVFile(csvFilePath, mergedTable)
 
-			// prune unnecessary columns
-			prunedTable := mergedTable.PruneColumns()
-			csvFilePath = fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, "pruned")
+			// TODO: perform advanced stat calculations
+
+			// TODO: perform fantasy football stat calculations
+
+			// add team name to footer and year column
+			updatedTable := mergedTable.AddTeamAndYear(team, strconv.Itoa(year))
+
+			// prune unnecessary columns and write output to file
+			prunedTable := updatedTable.PruneColumns()
+			csvFilePath = fmt.Sprintf("output/final/%s_%d.csv", team, year)
 			util.WriteCSVFile(csvFilePath, prunedTable)
-
-			// TODO: perform calculations
-
-			// TODO: write output to file
 		}
 	}
 
