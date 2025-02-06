@@ -52,13 +52,12 @@ func main() {
 		for team, team_key := range teamsToFetch {
 			teamCount += 1
 
-			// fetch and despoof page
+			// fetch team/year page
 			fetchFilePath := fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year)
 			_, err := os.Stat(fetchFilePath)
 			if errors.Is(err, os.ErrNotExist) || forceFetch == true {
 				pageString := pfr.FetchPage(team_key, year)
 				util.WriteFile(fetchFilePath, pageString)
-				pfr.DespoofPage(fetchFilePath)
 				fmt.Printf("    > Fetched %s %d ⬇️\n", team, year)
 
 				// sleep to avoid rate limiting, unless we've already fetched the last team in the last year

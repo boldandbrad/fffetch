@@ -1,14 +1,12 @@
 package pfr
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 
 	"github.com/boldandbrad/fffetch/internal/util"
@@ -40,37 +38,6 @@ func FetchPage(teamKey string, year int) string {
 		log.Fatal(err)
 	}
 	return string(bodyBytes)
-}
-
-func DespoofPage(filePath string) {
-	// read file into memory
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	var lines []string
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	// remove start and end comments
-	startPattern, _ := regexp.Compile("^[ ]*<!--$")
-	endPattern, _ := regexp.Compile("^-->$")
-	altEndPattern, _ := regexp.Compile("See more advanced stats here.</a></div>-->$")
-	for i, line := range lines {
-		if startPattern.MatchString(line) || endPattern.MatchString(line) {
-			lines[i] = ""
-		} else if altEndPattern.MatchString(line) {
-			lines[i] = strings.Replace(line, "-->", "", 1)
-		}
-	}
-
-	// write file back
-	util.WriteFile(filePath, strings.Join(lines, "\n"))
 }
 
 func ParsePage(filePath string) []util.Table {
