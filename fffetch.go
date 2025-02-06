@@ -12,7 +12,7 @@ import (
 )
 
 var TEAMS = []string{"DET"}
-var YEARS = []int{2023, 2024}
+var YEARS = []int{2024}
 
 func main() {
 
@@ -76,7 +76,10 @@ func main() {
 				util.WriteCSVFile(csvFilePath, table)
 			}
 
-			// combine table data
+			// merge table data
+			mergedTable := util.MergeTables(tables)
+			csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, mergedTable.Name)
+			util.WriteCSVFile(csvFilePath, mergedTable)
 
 			// perform calculations
 
