@@ -74,10 +74,11 @@ func main() {
 				csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, mergedTable.Name)
 				util.WriteCSVFile(csvFilePath, mergedTable)
 
-				// TODO: perform advanced stat calculations
+				// perform advanced stat calculations
 				statTable := calc.CalcAdvStats(mergedTable)
 
-				// TODO: perform fantasy football stat calculations
+				// perform fantasy football stat calculations
+				statTable = calc.CalcFFStats(statTable)
 
 				// add team name to footer and year column
 				updatedTable := statTable.AddTeamAndYear(team, strconv.Itoa(year))
