@@ -122,6 +122,16 @@ func parseTable(doc *goquery.Document, tableid string) util.Table {
 				})
 				table.Rows = append(table.Rows, row)
 			})
+
+			// grab footer row
+			var footerRow []string
+			tsel.Find("tfoot").Find("tr").Find("td").Each(func(_ int, csel *goquery.Selection) {
+				if csel != nil {
+					footerRow = append(footerRow, csel.Text())
+				}
+			})
+
+			table.FooterRow = footerRow
 		}
 	})
 

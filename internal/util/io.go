@@ -26,6 +26,7 @@ func WriteCSVFile(filePath string, table Table) {
 	}
 
 	lines := append([][]string{table.Headers}, table.Rows...)
+	lines = append(lines, table.FooterRow)
 	writer := csv.NewWriter(file)
 	err = writer.WriteAll(lines)
 	if err != nil {
