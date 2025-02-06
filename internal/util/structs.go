@@ -5,7 +5,7 @@ import (
 	"slices"
 )
 
-var OUT_HEADERS = []string{
+var FINAL_HEADERS = []string{
 	"year",
 	"order",
 	"player",
@@ -174,7 +174,7 @@ func MergeTables(tables []Table) Table {
 
 func (t Table) PruneColumns() Table {
 	tableMap := t.ToMap()
-	tableMap.Headers = OUT_HEADERS
+	tableMap.Headers = FINAL_HEADERS
 	prunedTable := tableMap.ToTable()
 	return prunedTable
 }

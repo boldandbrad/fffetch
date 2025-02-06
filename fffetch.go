@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/boldandbrad/fffetch/internal/calc"
 	"github.com/boldandbrad/fffetch/internal/pfr"
 	"github.com/boldandbrad/fffetch/internal/util"
 )
@@ -74,11 +75,12 @@ func main() {
 				util.WriteCSVFile(csvFilePath, mergedTable)
 
 				// TODO: perform advanced stat calculations
+				statTable := calc.CalcAdvStats(mergedTable)
 
 				// TODO: perform fantasy football stat calculations
 
 				// add team name to footer and year column
-				updatedTable := mergedTable.AddTeamAndYear(team, strconv.Itoa(year))
+				updatedTable := statTable.AddTeamAndYear(team, strconv.Itoa(year))
 
 				// prune unnecessary columns and write output to file
 				prunedTable := updatedTable.PruneColumns()
