@@ -25,7 +25,7 @@ func main() {
 
 	teamsToFetch := map[string]string{}
 	if len(TEAMS) == 0 {
-		// if no teams provided, fetch data for every team
+		// if no teams provided, fetch data for all teams
 		teamsToFetch = pfr.PFR_TEAM_KEYS
 	} else {
 		// fetch data for provided teams only
@@ -36,14 +36,14 @@ func main() {
 
 	yearsToFetch := []int{}
 	if len(YEARS) == 0 {
-		// if no years provided, fetch data for last year
+		// if no years provided, fetch data for last year only
 		yearsToFetch = append(yearsToFetch, time.Now().Year()-1)
 	} else {
 		// fetch data for provided years
 		yearsToFetch = YEARS
 	}
 
-	// fetch data for each team in each year
+	// fetch data for each provided team in each provided year
 	yearCount := 0
 	teamCount := 0
 	for _, year := range yearsToFetch {
@@ -80,9 +80,14 @@ func main() {
 			csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, mergedTable.Name)
 			util.WriteCSVFile(csvFilePath, mergedTable)
 
-			// perform calculations
+			// prune unnecessary columns
+			prunedTable := mergedTable.PruneColumns()
+			csvFilePath = fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, "pruned")
+			util.WriteCSVFile(csvFilePath, prunedTable)
 
-			// write output to file
+			// TODO: perform calculations
+
+			// TODO: write output to file
 		}
 	}
 

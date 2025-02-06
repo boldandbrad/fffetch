@@ -4,6 +4,33 @@ import (
 	"slices"
 )
 
+var OUT_HEADERS = []string{
+	"player",
+	"age",
+	"pos",
+	"g",
+	"gs",
+	"pass_cmp",
+	"pass_att",
+	"pass_yds",
+	"pass_td",
+	"pass_int",
+	"pass_sacked_yds",
+	"rush_att",
+	"rush_yds",
+	"rush_td",
+	"rush_1d",
+	"rush_1d%",
+	"targets",
+	"rec",
+	"rec_yds",
+	"rec_td",
+	"rec_1d",
+	"rec_1d%",
+	"touches",
+	"fumbles",
+}
+
 type Table struct {
 	Name      string
 	Headers   []string
@@ -119,4 +146,11 @@ func MergeTables(tables []Table) Table {
 		mergedTable.FooterRow = tables[0].FooterRow
 	}
 	return mergedTable
+}
+
+func (t Table) PruneColumns() Table {
+	tableMap := t.ToMap()
+	tableMap.Headers = OUT_HEADERS
+	prunedTable := tableMap.ToTable()
+	return prunedTable
 }
