@@ -13,7 +13,7 @@ import (
 )
 
 var TEAMS = []string{"DET"}
-var YEARS = []int{2024}
+var YEARS = []int{}
 
 func main() {
 
@@ -53,47 +53,48 @@ func main() {
 		for team, team_key := range teamsToFetch {
 			teamCount += 1
 
-			// fetch team/year page
+			// fetch and parse team/year page
 			fetchFilePath := fmt.Sprintf("output/fetched_pages/%s_%d.html", team, year)
 			_, err := os.Stat(fetchFilePath)
 			if errors.Is(err, os.ErrNotExist) || forceFetch == true {
+				// fetch page data
 				pageString := pfr.FetchPage(team_key, year)
 				util.WriteFile(fetchFilePath, pageString)
-				fmt.Printf("    > Fetched %s %d ⬇️\n", team, year)
+
+				// parse page table data
+				tables := pfr.ParsePage(fetchFilePath)
+				for _, table := range tables {
+					csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, table.Name)
+					util.WriteCSVFile(csvFilePath, table)
+				}
+
+				// merge table data
+				mergedTable := util.MergeTables(tables)
+				csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, mergedTable.Name)
+				util.WriteCSVFile(csvFilePath, mergedTable)
+
+				// TODO: perform advanced stat calculations
+
+				// TODO: perform fantasy football stat calculations
+
+				// add team name to footer and year column
+				updatedTable := mergedTable.AddTeamAndYear(team, strconv.Itoa(year))
+
+				// prune unnecessary columns and write output to file
+				prunedTable := updatedTable.PruneColumns()
+				csvFilePath = fmt.Sprintf("output/final/%s_%d.csv", team, year)
+				util.WriteCSVFile(csvFilePath, prunedTable)
+
+				fmt.Printf("    > Fetched %s %d ✅\n", team, year)
 
 				// sleep to avoid rate limiting, unless we've already fetched the last team in the last year
 				if yearCount < len(yearsToFetch) || teamCount < len(teamsToFetch) {
 					time.Sleep(time.Millisecond * time.Duration(rand.IntN(2500-2000)+2000))
 				}
 			} else {
-				fmt.Printf("    > Skipped fetching %s %d, already exists.\n", team, year)
+				fmt.Printf("    > Skipped %s %d, already exists 🤷\n", team, year)
 			}
-
-			// parse page table data
-			tables := pfr.ParsePage(fetchFilePath)
-			for _, table := range tables {
-				csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, table.Name)
-				util.WriteCSVFile(csvFilePath, table)
-			}
-
-			// merge table data
-			mergedTable := util.MergeTables(tables)
-			csvFilePath := fmt.Sprintf("output/parsed_tables/%s_%d_%s.csv", team, year, mergedTable.Name)
-			util.WriteCSVFile(csvFilePath, mergedTable)
-
-			// TODO: perform advanced stat calculations
-
-			// TODO: perform fantasy football stat calculations
-
-			// add team name to footer and year column
-			updatedTable := mergedTable.AddTeamAndYear(team, strconv.Itoa(year))
-
-			// prune unnecessary columns and write output to file
-			prunedTable := updatedTable.PruneColumns()
-			csvFilePath = fmt.Sprintf("output/final/%s_%d.csv", team, year)
-			util.WriteCSVFile(csvFilePath, prunedTable)
 		}
 	}
-
-	fmt.Println("FFFetching complete! 🌟")
+	fmt.Println("FFFetching finished 🌟")
 }
