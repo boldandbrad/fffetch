@@ -87,12 +87,12 @@ func MergeTables(tables []Table) Table {
 			tblMap := tbl.ToMap()
 			if len(tblMap.Dicts) > 0 {
 				for _, record := range tblMap.Dicts {
-					recordName := record["name_display"]
+					recordName := record["player"]
 					recordFound := false
 
 					for _, mergedRecord := range mergedTableMap.Dicts {
 						// if so, append row data to that record
-						if mergedRecord["name_display"] == recordName {
+						if mergedRecord["player"] == recordName {
 							recordFound = true
 							for _, header := range tbl.Headers {
 								mergedRecord[header] = record[header]

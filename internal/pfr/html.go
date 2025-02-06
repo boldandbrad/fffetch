@@ -103,9 +103,13 @@ func parseTable(doc *goquery.Document, tableid string) util.Table {
 			// loop through headers
 			tsel.Find("th").Each(func(_ int, hsel *goquery.Selection) {
 				if hsel != nil {
-					key, exists := hsel.Attr("data-stat")
-					if exists && key != "ranker" && !strings.Contains(key, "header") {
-						table.Headers = append(table.Headers, key)
+					header, exists := hsel.Attr("data-stat")
+					if exists && header != "ranker" && !strings.Contains(header, "header") {
+						// rename headers
+						if headerNewName, exists := HEADER_RENAMES[header]; exists {
+							header = headerNewName
+						}
+						table.Headers = append(table.Headers, header)
 					}
 				}
 			})
