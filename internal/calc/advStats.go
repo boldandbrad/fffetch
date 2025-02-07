@@ -16,6 +16,7 @@ var fieldsToPercent = []string{
 	"pass_td",
 	"pass_int",
 	"pass_1d",
+	"times sacked",
 	"pass_sacked_yds",
 	"rush_att",
 	"rush_yds",
