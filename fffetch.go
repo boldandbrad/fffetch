@@ -84,6 +84,7 @@ func main() {
 				updatedTable := statTable.AddTeamAndYear(team, strconv.Itoa(year))
 
 				// prune unnecessary columns and write output to file
+				updatedTable = updatedTable.Sort()
 				prunedTable := updatedTable.PruneColumns()
 				csvFilePath = fmt.Sprintf("output/final/%s_%d.csv", team, year)
 				util.WriteCSVFile(csvFilePath, prunedTable)

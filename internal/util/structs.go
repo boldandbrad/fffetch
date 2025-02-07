@@ -1,8 +1,11 @@
 package util
 
 import (
+	"cmp"
 	"fmt"
+	"log"
 	"slices"
+	"strconv"
 )
 
 var FINAL_HEADERS = []string{
@@ -129,6 +132,25 @@ func (m TableMap) ToTable() Table {
 		}
 	}
 	return table
+}
+
+func (t Table) Sort() Table {
+	m := t.ToMap()
+
+	// sort by position then std_pts
+	slices.SortFunc(m.Dicts, func(i, j map[string]string) int {
+		val1, err := strconv.ParseFloat(i["std_pts"], 64)
+		val2, err := strconv.ParseFloat(j["std_pts"], 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return cmp.Or(
+			cmp.Compare(i["pos"], j["pos"]),
+			cmp.Compare(val1, val2)*-1,
+		)
+	})
+
+	return m.ToTable()
 }
 
 func MergeTables(tables []Table) Table {
