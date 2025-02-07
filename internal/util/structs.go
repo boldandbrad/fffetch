@@ -61,6 +61,7 @@ var FINAL_HEADERS = []string{
 	"std_ppg",
 	"half_ppr_ppg",
 	"ppr_ppg",
+	"pos_rank",
 }
 
 type Table struct {
@@ -110,7 +111,7 @@ func (m TableMap) ToTable() Table {
 			value, exists := dict[header]
 			if exists {
 				row = append(row, value)
-			} else if header != "projection" {
+			} else if header != "projection" && header != "pos_rank" {
 				row = append(row, "0")
 			} else {
 				row = append(row, "")
