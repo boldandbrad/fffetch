@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"sort"
 	"strconv"
 
 	"github.com/boldandbrad/fffetch/internal/util"
@@ -16,6 +17,7 @@ var fantasyFootballFields = []string{
 	"std_ppg",
 	"half_ppr_ppg",
 	"ppr_ppg",
+	"order",
 }
 
 func CalcFFStats(table util.Table) util.Table {
@@ -63,7 +65,27 @@ func CalcFFStats(table util.Table) util.Table {
 		dict["ppr_ppg"] = fmt.Sprintf("%.2f", pprPpg)
 	}
 
-	// TODO: calculate order
+	// calculate order based on std_pts
+	dictsCopy := make([]map[string]string, len(tableMap.Dicts))
+	copy(dictsCopy, tableMap.Dicts)
+
+	sort.Slice(dictsCopy, func(i, j int) bool {
+		val1, err := strconv.ParseFloat(dictsCopy[i]["std_pts"], 64)
+		val2, err := strconv.ParseFloat(dictsCopy[j]["std_pts"], 64)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return val1 > val2
+	})
+
+	for i, dictcopy := range dictsCopy {
+		for _, dict := range tableMap.Dicts {
+			if dict["player"] == dictcopy["player"] {
+				dict["order"] = strconv.Itoa(i + 1)
+				break
+			}
+		}
+	}
 
 	return tableMap.ToTable()
 }
