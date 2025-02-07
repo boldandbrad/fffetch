@@ -8,6 +8,7 @@ import (
 var FINAL_HEADERS = []string{
 	"year",
 	"order",
+	"projection",
 	"player",
 	"age",
 	"pos",
@@ -102,8 +103,10 @@ func (m TableMap) ToTable() Table {
 			value, exists := dict[header]
 			if exists {
 				row = append(row, value)
-			} else {
+			} else if header != "projection" {
 				row = append(row, "0")
+			} else {
+				row = append(row, "")
 			}
 		}
 		table.Rows = append(table.Rows, row)
