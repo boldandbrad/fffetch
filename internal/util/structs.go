@@ -112,12 +112,12 @@ func (m TableMap) ToTable() Table {
 		row := []string{}
 		for _, header := range m.Headers {
 			value, exists := dict[header]
-			if exists {
+			if exists && value != "" {
 				row = append(row, value)
-			} else if header != "projection" && header != "pos_rank" {
-				row = append(row, "0")
-			} else {
+			} else if header == "projection" || header == "pos_rank" {
 				row = append(row, "")
+			} else {
+				row = append(row, "0")
 			}
 		}
 		table.Rows = append(table.Rows, row)
