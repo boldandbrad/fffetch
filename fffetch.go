@@ -13,7 +13,7 @@ import (
 	"github.com/boldandbrad/fffetch/internal/util"
 )
 
-var TEAMS = []string{"DET"}
+var TEAMS = []string{}
 var YEARS = []int{}
 
 func main() {
