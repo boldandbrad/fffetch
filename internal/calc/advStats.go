@@ -21,10 +21,12 @@ var fieldsToPercent = []string{
 	"rush_att",
 	"rush_yds",
 	"rush_td",
+	"rush_1d",
 	"targets",
 	"rec",
 	"rec_yds",
 	"rec_td",
+	"rec_1d",
 	"touches",
 	"fumbles",
 }

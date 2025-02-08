@@ -48,9 +48,7 @@ var HEADER_RENAMES = map[string]string{
 	"games":           "g",
 	"games_started":   "gs",
 	"rush_first_down": "rush_1d",
-	"rush_success":    "rush_1d%",
 	"rec_first_down":  "rec_1d",
-	"rec_success":     "rec_1d%",
 	"pass_first_down": "pass_1d",
 	"pass_sacked":     "times sacked",
 }
