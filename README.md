@@ -14,7 +14,55 @@ personal Fantasy Football simulations.
 
 ## Usage
 
-> Coming soon.
+Build the binary:
+
+```bash
+go build -o fffetch
+```
+
+Run the fetch command:
+
+```bash
+./fffetch fetch
+```
+
+By default, this fetches data for all NFL teams from the previous season.
+
+### Options
+
+- `-t, --team <team>`: Specify teams to fetch (e.g., `-t KC`, `-t BUF -t PHI`). Defaults to all teams.
+- `-y, --year <year>`: Specify years to fetch (e.g., `-y 2023`, `-y 2023 -y 2024`). Defaults to previous year.
+- `-f, --force`: Force re-fetch existing data instead of skipping it.
+
+### Examples
+
+Fetch Lions 2023 data:
+
+```bash
+./fffetch fetch -t DET -y 2023
+```
+
+Fetch multiple teams and years:
+
+```bash
+./fffetch fetch -t DET -t GB -t MIN -y 2023 -y 2024
+```
+
+Re-fetch existing data:
+
+```bash
+./fffetch fetch --force
+```
+
+### Output
+
+The tool displays an interactive progress bar (in supported terminals) with status updates for each team/year combination. Data is saved to CSV files in the `output/final/` directory.
+
+### Notes
+
+- Requests are spaced out by 2-4.5 seconds to avoid rate limiting on Pro Football Reference
+- Canceling the job at any time is OK (press `q` or `Ctrl+C` in interactive mode)
+- Existing data is automatically skipped unless using `--force` flag
 
 ## Dev Setup
 
@@ -27,19 +75,12 @@ git clone https://github.com/boldandbrad/fffetch
 Ensure [Go](https://go.dev/) is installed, matching or exceeding the version
 listed in [go.mod](./go.mod).
 
-Then, run the project:
+Then, build and run:
 
+```bash
+go build -o fffetch
+./fffetch fetch
 ```
-go run .
-```
-
-By default it will attempt to fetch and parse data for all NFL teams from the
-most recent season. In order to avoid rate limits on Pro Football Reference,
-requests are spaced out by roughly 5 seconds each, which means the script may
-run for a couple minutes. Canceling the job at any time is OK.
-
-Modify the default behavior by updating the `teams` and `years` slices in
-[fffetch.go](./fffetch.go).
 
 ## License
 
